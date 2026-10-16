@@ -1,0 +1,28 @@
+buildscript {
+    repositories { google(); mavenCentral() }
+    dependencies { classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.20' }
+}
+apply plugin: 'com.android.library'
+apply plugin: 'org.jetbrains.kotlin.android'
+android {
+    namespace 'it.tyb.wristband'
+    compileSdk 36
+    defaultConfig { minSdk 26; consumerProguardFiles 'consumer-rules.pro' }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_21; targetCompatibility JavaVersion.VERSION_21 }
+    kotlinOptions { jvmTarget = '21' }
+    testOptions { unitTests.returnDefaultValues = true }
+}
+repositories { google(); mavenCentral(); maven { url uri('vendor') } }
+dependencies {
+    implementation project(':capacitor-android')
+    implementation 'androidx.appcompat:appcompat:1.7.1'
+    api 'it.tyb.vendor:qring:1.0.0.78-tyb.1'
+    implementation 'androidx.core:core-ktx:1.17.0'
+    implementation 'com.google.code.gson:gson:2.13.2'
+    implementation 'com.elvishew:xlog:1.11.1'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.json:json:20250517'
+}
+
+def wristbandVendorRepo = file("vendor")
+rootProject.allprojects { repositories { maven { url wristbandVendorRepo } } }

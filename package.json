@@ -1,0 +1,47 @@
+{
+  "name": "capacitor-wristband",
+  "version": "0.1.0",
+  "description": "Unified QRing wristband flows for Capacitor iOS and Android",
+  "type": "module",
+  "main": "dist/plugin.cjs",
+  "module": "dist/esm/index.js",
+  "types": "dist/esm/definitions.d.ts",
+  "files": [
+    "dist",
+    "ios",
+    "android",
+    "Package.swift",
+    "README.md",
+    "docs",
+    "scripts"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && rollup -c",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test test/*.test.ts",
+    "check": "npm run typecheck && npm test && npm run build",
+    "test:ios-policy": "sh scripts/test-ios-policy.sh",
+    "example:build": "esbuild example/src/main.ts --bundle --format=esm --outfile=example/www/main.js"
+  },
+  "peerDependencies": {
+    "@capacitor/core": ">=8.0.0 <9"
+  },
+  "devDependencies": {
+    "@capacitor/core": "8.5.2",
+    "@types/node": "^24.0.0",
+    "esbuild": "^0.28.2",
+    "rollup": "^4.0.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.3"
+  },
+  "capacitor": {
+    "ios": {
+      "src": "ios"
+    },
+    "android": {
+      "src": "android"
+    }
+  },
+  "private": true,
+  "license": "UNLICENSED"
+}

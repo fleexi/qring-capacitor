@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Wristband Example</string>
+    <string name="title_activity_main">Wristband Example</string>
+    <string name="package_name">it.tyb.wristband.example</string>
+    <string name="custom_url_scheme">it.tyb.wristband.example</string>
+</resources>
