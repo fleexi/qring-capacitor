@@ -1,6 +1,6 @@
 {
   "name": "capacitor-wristband",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "Unified QRing wristband flows for Capacitor iOS and Android",
   "type": "module",
   "main": "dist/plugin.cjs",

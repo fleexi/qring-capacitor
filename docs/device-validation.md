@@ -102,3 +102,8 @@ Sonno: controllare inizio/fine notturni a cavallo di mezzanotte, nap, fasi, gior
 ## Verifica manuale 0.3.7: raggruppamento sonno
 
 Confrontare il 16/10 delle foto: una voce notturna su entrambe le piattaforme invece delle 18 voci iOS; le fasi devono conservare i propri orari e durate (prima fase light da 36 minuti). Se le SDK restituiscono le stesse fasi, durata totale attesa 473 minuti e periodo 00:31–08:24. Controllare tutte le fasi, inclusi awake, assenza di duplicazioni, somma delle durate, ordinamento, notte separata da nap e giorni vuoti. Verificare anche due nap nello stesso giorno (raggruppati come Android), intervalli a cavallo di mezzanotte, fasi senza tempi e durata di intervallo diversa dalla somma delle fasi in presenza di pause.
+
+
+## Verifica manuale 0.3.8: etichette delle fasi Android
+
+Ripetere l'export su Android e confrontare con iOS: deep/light/awake/rem devono corrispondere a SleepDataBean 1/2/3/4. Sul dataset fornito: totali deep=387, awake=46, light=1230, rem=211 minuti; nessuna fase unknown precedentemente dovuta al codice 3. Totali giornalieri e start/end devono restare invariati. La diversa divisione di alcune fasi light contigue deve rimanere: non viene fatta alcuna fusione aggiuntiva. Codici SDK non riconosciuti restano unknown.

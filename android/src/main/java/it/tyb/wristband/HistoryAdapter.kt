@@ -67,7 +67,8 @@ internal fun sleepRecords(r:SleepDisplay?,date:String):JSONArray=JSONArray().app
         if (phases.isNullOrEmpty()) return
         val mapped = JSONArray()
         for (sample in phases) {
-            val stage = when(sample.type) { 1->"awake"; 2->"light"; 4->"rem"; 5->"deep"; else->"unknown" }
+            // SleepDataBean codes confirmed in the bundled SDK and paired device exports.
+            val stage = when(sample.type) { 1->"deep"; 2->"light"; 3->"awake"; 4->"rem"; else->"unknown" }
             val phase = json("stage" to stage,"durationSeconds" to (sample.sleepEnd-sample.sleepStart).coerceAtLeast(0))
             if (sample.sleepStart > 0 && sample.sleepEnd > sample.sleepStart) {
                 phase.put("start",sample.sleepStart*1000).put("end",sample.sleepEnd*1000)

@@ -17,7 +17,7 @@ npm pack
 Dalla directory `onactive-app`:
 
 ```sh
-npm install ../../tyb-wirstband/capacitor-wristband/capacitor-wristband-0.3.7.tgz
+npm install ../../tyb-wirstband/capacitor-wristband/capacitor-wristband-0.3.8.tgz
 npm run sync-dev
 ```
 
@@ -149,3 +149,8 @@ Ripristinati i tempi di passi e sonno. Passi: timestamp/utcOffsetMinutes/timesta
 ## Migrazione alla 0.3.7
 
 Sonno raggruppato allo stesso modo su iOS e Android: al massimo una voce notturna (nap=false) e una diurna (nap=true) per giorno, con tutte le fasi in phases. durationSeconds è la somma delle durate delle fasi, comprese quelle awake, come nella rappresentazione Android esistente; non è la sola durata del sonno effettivo. start/end sono il minimo inizio e il massimo termine dei segmenti, se tutti temporizzati; l'intervallo può includere pause. Le fasi mantengono stadio, durata e orari disponibili, ordinate cronologicamente quando tutte temporizzate. Nessuna voce vuota e nessuna fusione tra notte e riposi diurni. Non cambia la SDK usata.
+
+
+## Migrazione alla 0.3.8
+
+Corretta la mappatura delle fasi Android SleepDataBean in base al codice della SDK inclusa e agli export iOS/Android confrontati: 1=deep, 2=light, 3=awake, 4=rem; gli altri codici rimangono unknown. Prima il tipo 1 veniva erroneamente esposto come awake e il tipo 3 come unknown. Durate, istanti, segmentazione e raggruppamento restano invariati. Sui dati del 11–17 ottobre 2026 la correzione riallinea 387 minuti deep e 46 minuti awake; le differenze di divisione delle fasi light contigue tra SDK rimangono preservate.
