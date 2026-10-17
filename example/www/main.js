@@ -582,12 +582,6 @@ var init_web = __esm({
       async syncHistory(..._args) {
         return this.unsupportedPlatform();
       }
-      async startMeasurement(..._args) {
-        return this.unsupportedPlatform();
-      }
-      async stopMeasurement(..._args) {
-        return this.unsupportedPlatform();
-      }
       async getMeasurementSettings(..._args) {
         return this.unsupportedPlatform();
       }
@@ -611,7 +605,6 @@ var report = (label, value) => {
   log.textContent = `${label}: ${JSON.stringify(value, null, 2)}
 ${log.textContent}`.slice(0, 3e4);
 };
-var session;
 async function run(action) {
   switch (action) {
     case "initialize":
@@ -636,14 +629,6 @@ async function run(action) {
     }
     case "history":
       return Wristband.getHistory({ metric: metric(), startDay: 0, days: 7 });
-    case "single":
-      session = await Wristband.startMeasurement({ metric: metric(), mode: "single" });
-      return session;
-    case "continuous":
-      session = await Wristband.startMeasurement({ metric: metric(), mode: "continuous" });
-      return session;
-    case "stop":
-      return session ? Wristband.stopMeasurement(session) : { stopped: false };
     case "disconnect":
       return Wristband.disconnect();
     case "reconnect":
@@ -656,7 +641,7 @@ for (const button of document.querySelectorAll("[data-action]")) button.onclick 
   const action = button.dataset.action;
   void run(action).then((v) => report(action, v)).catch((e) => report(action, { code: e.code, message: e.message, data: e.data }));
 };
-for (const name of ["connectionStateChanged", "bluetoothStateChanged", "historyBatch", "syncProgress", "measurementUpdated", "measurementFinished"]) void Wristband.addListener(name, (event) => report(name, event));
+for (const name of ["connectionStateChanged", "bluetoothStateChanged", "historyBatch", "syncProgress"]) void Wristband.addListener(name, (event) => report(name, event));
 void Wristband.addListener("scanResult", (device) => {
   report("scanResult", device);
   const list = document.querySelector("#devices");

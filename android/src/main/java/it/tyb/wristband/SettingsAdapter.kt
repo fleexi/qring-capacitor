@@ -3,14 +3,13 @@ import org.json.JSONObject
 import com.oudmon.ble.base.communication.req.*
 import com.oudmon.ble.base.communication.rsp.*
 internal fun WristbandSession.readSettings(m:String,done:(JSONObject?,BaseRspCmd?,JSONObject?)->Unit) {
-    val req:BaseReqCmd=when(m){"heartRate"->HeartRateSettingReq.getReadInstance();"bloodOxygen"->BloodOxygenSettingReq.getReadInstance();"hrv"->HrvSettingReq.getReadInstance();"stress"->PressureSettingReq.getReadInstance();"temperature"->SugarLipidsSettingReq.getReadTemperatureInstance();else->{done(null,null,error("UNSUPPORTED","No settings for metric"));return}}
+    val req:BaseReqCmd=when(m){"heartRate"->HeartRateSettingReq.getReadInstance();"bloodOxygen"->BloodOxygenSettingReq.getReadInstance();"hrv"->HrvSettingReq.getReadInstance();"stress"->PressureSettingReq.getReadInstance();else->{done(null,null,error("UNSUPPORTED","No settings for metric"));return}}
     request(req){rsp,e->if(e!=null){done(null,null,e);return@request}
         val values=when(rsp){
             is HeartRateSettingRsp->json("enabled" to rsp.isEnable,"intervalMinutes" to rsp.heartInterval)
             is BloodOxygenSettingRsp->json("enabled" to rsp.isEnable,"intervalMinutes" to (rsp.interval.toInt() and 255))
             is HRVSettingRsp->json("enabled" to rsp.isEnable)
             is PressureSettingRsp->json("enabled" to rsp.isEnable).apply{if(rsp.isIntervalSettingSupported){put("intervalMinutes",rsp.interval);put("min",rsp.minInterval)}}
-            is BloodSugarLipidsSettingRsp->json("enabled" to rsp.isEnable,"intervalMinutes" to rsp.interval)
             else->{done(null,null,error("SDK_ERROR","Unexpected setting response"));return@request}
         }
         if(values.optInt("intervalMinutes",0)>0)settingMetadata[m]=json("support" to "supported","readable" to true,"writable" to true,"min" to values.optInt("min",1),"max" to 255,"step" to 1)
@@ -32,7 +31,6 @@ internal fun WristbandSession.settings(m:String,patch:JSONObject?,done:Reply) {
             is BloodOxygenSettingRsp->BloodOxygenSettingReq.getWriteInstance(enabled,interval.toByte())
             is HRVSettingRsp->HrvSettingReq.getWriteInstance(enabled)
             is PressureSettingRsp->if(raw.isIntervalSettingSupported)PressureSettingReq.getWriteInstance(enabled,interval)else PressureSettingReq.getWriteInstance(enabled)
-            is BloodSugarLipidsSettingRsp->SugarLipidsSettingReq.getWriteInstance(SugarLipidsSettingReq.TYPE_TEMPERATURE,enabled,raw.value,interval)
             else->{done(null,error("UNSUPPORTED","Cannot preserve vendor fields"));return@readSettings}
         }
         request(req){_,writeError->if(writeError!=null){done(null,writeError);return@request}

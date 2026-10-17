@@ -11,4 +11,8 @@
 + (NSDictionary *)failedHistory:(NSArray *)jobs batches:(NSArray *)batches operation:(NSString *)operation device:(NSString *)device error:(NSDictionary *)error;
 + (BOOL)verificationMatches:(NSDictionary *)patch actual:(NSDictionary *)actual;
 + (NSInteger)dayIndex:(NSDate *)date today:(NSDate *)today calendar:(NSCalendar *)calendar;
++ (NSArray *)scheduledValues:(NSArray *)values metric:(NSString *)metric modelDate:(NSString *)modelDate expectedDate:(NSString *)expectedDate intervalSeconds:(double)intervalSeconds calendar:(NSCalendar *)calendar error:(NSDictionary **)error;
++ (NSDictionary *)timestampFieldsForDate:(NSDate *)date expectedDate:(NSString *)expectedDate calendar:(NSCalendar *)calendar error:(NSDictionary **)error;
++ (NSDate *)localDateTime:(NSString *)value calendar:(NSCalendar *)calendar;
++ (NSNumber *)scheduledOxygenValueForSource:(NSInteger)source maximum:(double)maximum minimum:(double)minimum value:(double)value;
 @end

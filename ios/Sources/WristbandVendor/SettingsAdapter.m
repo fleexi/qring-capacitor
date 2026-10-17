@@ -2,19 +2,16 @@
 @implementation WBSession (Settings)
 - (NSDictionary *)metricCapability:(NSString *)m {
     BOOL ready=[self.connection isEqual:@"ready"];
-    NSString *key=@{@"heartRate":QCBandFeatureManualHeartRate,@"bloodOxygen":QCBandFeatureBloodOxygen,@"temperature":QCBandFeatureTemperature,@"hrv":QCBandFeatureHRV,@"stress":QCBandFeatureStress}[m];
+    NSString *key=@{@"bloodOxygen":QCBandFeatureBloodOxygen,@"hrv":QCBandFeatureHRV,@"stress":QCBandFeatureStress}[m];
     NSString *s=!ready?@"unknown":(!key?@"supported":(!self.features[key]?@"unknown":([self.features[key] boolValue]?@"supported":@"unsupported")));
     if([m isEqual:@"heartRate"] && ready)s=@"supported";
     NSDictionary *op=@{@"support":s,@"reason":@"SDK protocol and device feature flags"};
-    NSDictionary *no=@{@"support":@"unsupported",@"reason":@"No API in v1"};
     BOOL numeric=![@[@"steps",@"sleep"] containsObject:m];
-    NSString *setting=(!numeric || ([m isEqual:@"temperature"] && ![self.kind isEqual:@"ring"]))?@"unsupported":s;
+    NSString *setting=!numeric?@"unsupported":s;
     NSDictionary *en=@{@"support":setting,@"readable":@(![setting isEqual:@"unsupported"]),@"writable":@(![setting isEqual:@"unsupported"])};
     NSDictionary *interval=self.settingsMetadata[m]?:@{@"support":@"unknown",@"readable":@NO,@"writable":@NO};
-    if(!numeric || [m isEqual:@"hrv"] || [m isEqual:@"temperature"])interval=@{@"support":@"unsupported",@"readable":@NO,@"writable":@NO,@"reason":@"No verified interval read/write mapping in v1"};
-    NSString *app=!ready?@"unknown":(!self.features[QCBandFeatureAppManual]?@"unknown":([self.features[QCBandFeatureAppManual] boolValue]?@"supported":@"unsupported"));
-    NSDictionary *single=op;if([m isEqual:@"heartRate"]){NSString *manual=!ready || !self.features[QCBandFeatureManualHeartRate]?@"unknown":([self.features[QCBandFeatureManualHeartRate] boolValue]?@"supported":@"unsupported");single=@{@"support":manual};}
-    return @{@"history":op,@"singleMeasurement":numeric?single:no,@"continuousMeasurement":[m isEqual:@"heartRate"]?@{@"support":app}:no,@"settings":@{@"enabled":en,@"intervalMinutes":interval}};
+    if(!numeric || [m isEqual:@"hrv"])interval=@{@"support":@"unsupported",@"readable":@NO,@"writable":@NO,@"reason":@"No verified interval read/write mapping in v1"};
+    return @{@"history":op,@"settings":@{@"enabled":en,@"intervalMinutes":interval}};
 }
 - (NSDictionary *)capabilities {NSMutableDictionary *metrics=[NSMutableDictionary new];for(NSString *m in WBMetrics())metrics[m]=[self metricCapability:m];return @{@"metrics":metrics};}
 - (void)readSettings:(NSString *)m done:(WBReply)done {
@@ -24,7 +21,6 @@
     else if([m isEqual:@"bloodOxygen"]) [QCSDKCmdCreator getSchedualBOInfoWithIntervalSuccess:value fail:fail];
     else if([m isEqual:@"hrv"]) [QCSDKCmdCreator getSchedualHRVWithFinshed:^(BOOL e,NSError *error){if(error)fail();else value(e,0);}];
     else if([m isEqual:@"stress"]) [QCSDKCmdCreator getSchedualStressStatusWithIntervalFinshed:^(BOOL e,NSInteger min,NSInteger current,NSError *error){if(error)fail();else reply(@{@"enabled":@(e),@"intervalMinutes":@(current),@"min":@(min)},nil);}];
-    else if([m isEqual:@"temperature"]) [QCSDKCmdCreator getSchedualInfoType:SchedualInfoTypeBodyTemperator success:^(BOOL e,NSInteger calibrate){reply(@{@"enabled":@(e),@"calibrate":@(calibrate)},nil);} fail:fail];
     else reply(nil,WBError(@"UNSUPPORTED",@"No settings for this metric"));
 }
 - (NSDictionary *)publicSettings:(NSString *)m values:(NSDictionary *)v {
@@ -46,7 +42,6 @@
         else if([m isEqual:@"bloodOxygen"]) {if(interval)[QCSDKCmdCreator setSchedualBOInfoOn:enabled timeInterval:interval.integerValue success:success fail:fail];else [QCSDKCmdCreator setSchedualBOInfoOn:enabled success:^(BOOL x){success();} fail:fail];}
         else if([m isEqual:@"hrv"]) [QCSDKCmdCreator setSchedualHRVStatus:enabled finshed:^(NSError *error){if(error)fail();else success();}];
         else if([m isEqual:@"stress"]) {if(interval)[QCSDKCmdCreator setSchedualStressStatus:enabled interval:interval.integerValue finshed:^(NSError *error){if(error)fail();else success();}];else [QCSDKCmdCreator setSchedualStressStatus:enabled finshed:^(NSError *error){if(error)fail();else success();}];}
-        else [QCSDKCmdCreator setSchedualInfoType:SchedualInfoTypeBodyTemperator featureOn:enabled calibrate:[v[@"calibrate"] integerValue] success:success fail:fail];
     }];
 }
 @end

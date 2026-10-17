@@ -1,7 +1,7 @@
 package it.tyb.wristband
 import org.json.JSONObject
 internal object Policy {
-    val metrics=listOf("heartRate","bloodOxygen","temperature","hrv","stress","steps","sleep")
+    val metrics=listOf("heartRate","bloodOxygen","hrv","stress","steps","sleep")
     fun validWindow(start:Int,days:Int)=start>=0 && days>=1 && start<=6 && days<=7-start
     fun patchError(p:JSONObject?):String? {
         if(p==null || p.length()==0)return "Patch must not be empty"
@@ -18,7 +18,7 @@ internal object Policy {
     }
     fun verificationMatches(patch:JSONObject,actual:JSONObject)=patch.keys().asSequence().all{patch.opt(it)==actual.opt(it)}
     fun dayIndex(date:java.time.LocalDate,today:java.time.LocalDate):Int?=java.time.temporal.ChronoUnit.DAYS.between(date,today).toInt().takeIf{it in 0..6}
-    fun unit(m:String)=when(m){"heartRate"->"bpm";"bloodOxygen"->"%";"temperature"->"celsius";else->"vendor"}
+    fun unit(m:String)=when(m){"heartRate"->"bpm";"bloodOxygen"->"%";else->"vendor"}
 }
 internal fun json(vararg pairs:Pair<String,Any?>)=JSONObject().apply { for((k,v) in pairs)if(v!=null)put(k,v) }
 internal fun error(code:String,message:String)=json("code" to code,"message" to message)

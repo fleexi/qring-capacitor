@@ -21,8 +21,6 @@ public class WristbandPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "getCapabilities", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "getHistory", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "syncHistory", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "startMeasurement", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "stopMeasurement", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "getMeasurementSettings", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "setMeasurementSettings", returnType: CAPPluginReturnPromise)
     ]
@@ -57,8 +55,6 @@ public class WristbandPlugin: CAPPlugin, CAPBridgedPlugin {
     @objc func getCapabilities(_ call: CAPPluginCall) { invoke("getCapabilities", call) }
     @objc func getHistory(_ call: CAPPluginCall) { invoke("getHistory", call) }
     @objc func syncHistory(_ call: CAPPluginCall) { invoke("syncHistory", call) }
-    @objc func startMeasurement(_ call: CAPPluginCall) { invoke("startMeasurement", call) }
-    @objc func stopMeasurement(_ call: CAPPluginCall) { invoke("stopMeasurement", call) }
     @objc func getMeasurementSettings(_ call: CAPPluginCall) { invoke("getMeasurementSettings", call) }
     @objc func setMeasurementSettings(_ call: CAPPluginCall) { invoke("setMeasurementSettings", call) }
 }

@@ -1,6 +1,6 @@
 {
   "name": "capacitor-wristband",
-  "version": "0.1.0",
+  "version": "0.3.7",
   "description": "Unified QRing wristband flows for Capacitor iOS and Android",
   "type": "module",
   "main": "dist/plugin.cjs",
@@ -8,8 +8,12 @@
   "types": "dist/esm/definitions.d.ts",
   "files": [
     "dist",
-    "ios",
-    "android",
+    "ios/Sources",
+    "ios/Vendor",
+    "android/src/main",
+    "android/build.gradle",
+    "android/consumer-rules.pro",
+    "android/vendor",
     "Package.swift",
     "README.md",
     "docs",

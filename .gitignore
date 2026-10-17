@@ -12,3 +12,4 @@ example/android/build/
 example/android/app/build/
 example/android/local.properties
 example/ios/App/CapApp-SPM/.build/
+example/android/.kotlin/

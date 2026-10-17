@@ -30,8 +30,6 @@ class WristbandPlugin : Plugin() {
     @PluginMethod fun getCapabilities(call:PluginCall){invoke("getCapabilities",call)}
     @PluginMethod fun getHistory(call:PluginCall){invoke("getHistory",call)}
     @PluginMethod fun syncHistory(call:PluginCall){invoke("syncHistory",call)}
-    @PluginMethod fun startMeasurement(call:PluginCall){invoke("startMeasurement",call)}
-    @PluginMethod fun stopMeasurement(call:PluginCall){invoke("stopMeasurement",call)}
     @PluginMethod fun getMeasurementSettings(call:PluginCall){invoke("getMeasurementSettings",call)}
     @PluginMethod fun setMeasurementSettings(call:PluginCall){invoke("setMeasurementSettings",call)}
 }

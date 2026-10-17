@@ -18,8 +18,6 @@ export class WristbandWeb extends WebPlugin implements WristbandPlugin {
   async getCapabilities(..._args: Parameters<WristbandPlugin['getCapabilities']>): ReturnType<WristbandPlugin['getCapabilities']> { return this.unsupportedPlatform(); }
   async getHistory(..._args: Parameters<WristbandPlugin['getHistory']>): ReturnType<WristbandPlugin['getHistory']> { return this.unsupportedPlatform(); }
   async syncHistory(..._args: Parameters<WristbandPlugin['syncHistory']>): ReturnType<WristbandPlugin['syncHistory']> { return this.unsupportedPlatform(); }
-  async startMeasurement(..._args: Parameters<WristbandPlugin['startMeasurement']>): ReturnType<WristbandPlugin['startMeasurement']> { return this.unsupportedPlatform(); }
-  async stopMeasurement(..._args: Parameters<WristbandPlugin['stopMeasurement']>): ReturnType<WristbandPlugin['stopMeasurement']> { return this.unsupportedPlatform(); }
   async getMeasurementSettings(..._args: Parameters<WristbandPlugin['getMeasurementSettings']>): ReturnType<WristbandPlugin['getMeasurementSettings']> { return this.unsupportedPlatform(); }
   async setMeasurementSettings(..._args: Parameters<WristbandPlugin['setMeasurementSettings']>): ReturnType<WristbandPlugin['setMeasurementSettings']> { return this.unsupportedPlatform(); }
 }
