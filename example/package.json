@@ -1,1 +1,1 @@
-{"name":"wristband-example","version":"0.1.0","private":true,"type":"module","dependencies":{"@capacitor/android":"8.5.2","@capacitor/core":"8.5.2","@capacitor/ios":"8.5.2","capacitor-wristband":"file:../capacitor-wristband-0.2.2.tgz"},"devDependencies":{"@capacitor/cli":"8.5.2"}}
+{"name":"wristband-example","version":"0.1.0","private":true,"type":"module","dependencies":{"@capacitor/android":"8.5.2","@capacitor/core":"8.5.2","@capacitor/ios":"8.5.2","whesp-wirstband-capacitor":"file:../whesp-wirstband-capacitor-0.3.11.tgz"},"devDependencies":{"@capacitor/cli":"8.5.2"}}

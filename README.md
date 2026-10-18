@@ -1,29 +1,32 @@
-# capacitor-wristband
+# whesp-wirstband-capacitor
 
 Plugin Capacitor 8 per le SDK QRing fornite: iOS 1.0.0 (20260920), Android 1.0.0.78. Contratto TypeScript unico per raccolta automatica, adattatori nativi, un dispositivo per volta.
 
 ## Installazione in OnActive
 
-Richiede Capacitor 8, iOS 15+ e Swift Package Manager; Android minSdk 26, compileSdk 36 e Java 21. La prima app verificata come configurazione è `../../whesp/onactive-app` rispetto a questa directory. Il plugin non è stato installato automaticamente nell'app.
+Richiede Capacitor 8, iOS 15+ e Swift Package Manager; Android minSdk 26, compileSdk 36 e Java 21. La prima app verificata come configurazione è `../../onactive-app` rispetto a questa directory. Il plugin è installato in OnActive tramite tarball locale.
 
 Dalla directory del plugin:
 
 ```sh
 npm ci
-npm run check
+npm run typecheck
+npm run build
 npm pack
 ```
 
 Dalla directory `onactive-app`:
 
 ```sh
-npm install ../../tyb-wirstband/capacitor-wristband/capacitor-wristband-0.3.8.tgz
+npm install ../whesp-capacitor/whesp-wirstband-capacitor/whesp-wirstband-capacitor-0.3.11.tgz
 npm run sync-dev
 ```
 
-Usare `sync-demo` o `sync-prod` quando appropriato: questi script preservano APP_FLAVOUR. Non modificare il Package.swift generato dalla CLI. Il pacchetto SPM esporta il prodotto `CapacitorWristband`.
+Usare `sync-demo` o `sync-prod` quando appropriato: questi script preservano APP_FLAVOUR. Non modificare il Package.swift generato dalla CLI. Il pacchetto SPM esporta il prodotto `WhespWirstbandCapacitor`.
 
 Il target SPM del plugin propaga `-ObjC` al linker dell'app: il flag è necessario per caricare le categorie Objective-C della SDK, inclusa `NSDateAdditions` usata nella lettura dello storico.
+
+Il repository è in `../whesp-capacitor/whesp-wirstband-capacitor` rispetto a OnActive, insieme a `whesp-measure-sync-capacitor`. Le SDK originali restano in `../../../tyb-wirstband` rispetto alla radice di questo plugin. Il comando OnActive `npm run update-wristband-plugin` compila, crea il tarball e reinstalla il pacchetto anche mantenendo la stessa versione; eseguire poi la sincronizzazione Capacitor del flavour interessato. Il nome registrato nel bridge resta `Wristband` e il prodotto Swift è `WhespWirstbandCapacitor`.
 
 In `ios/App/App/Info.plist` aggiungere `NSBluetoothAlwaysUsageDescription` con una spiegazione adeguata all'app. L'esempio la include già. Il framework vendor consegnato contiene **solo iOS device arm64**: il simulatore non è supportato. Non è una XCFramework universale; non contiene una slice simulatore inventata.
 
@@ -32,7 +35,7 @@ Per Android usare `@capacitor/android` della stessa versione dell'app e impostar
 ## Uso
 
 ```ts
-import { Wristband } from 'capacitor-wristband';
+import { Wristband } from 'whesp-wirstband-capacitor';
 
 // Scegliere il tipo reale: band, watch o ring. Il nome QRing della SDK non basta.
 await Wristband.initialize({ deviceKind: 'band' });
@@ -63,6 +66,12 @@ await Wristband.disconnect();
 `deviceId` nell'esempio è una variabile dell'app, non un MAC hardcoded. Connettere un risultato soltanto dopo aver verificato che sia il dispositivo atteso. Entrambe le piattaforme scansionano le periferiche BLE disponibili; non tutte sono compatibili con il protocollo QRing.
 
 ## Flussi e impostazioni
+
+Dalla 0.3.11 Android conserva il nome BLE annunciato durante la scansione, associandolo all'indirizzo del dispositivo. Se la cache Bluetooth non fornisce un nome, `connect` e `getDeviceInfo` usano quello della scansione; per `reconnect` è conservato anche il nome dell'ultimo dispositivo. Un annuncio senza nome non cancella un nome già rilevato nella stessa scansione. Il nome salvato è riutilizzato solo per lo stesso deviceId ed è rimosso da `forgetDevice`. Se nessuna fonte fornisce un nome, il campo resta assente.
+
+Dalla 0.3.10 il mapping iOS di `getDeviceSoftAndHardVersionSuccess:fail:` interpreta il primo argomento come hardware e il secondo come firmware. Il confronto sul bracciale RFY260W con Android ha confermato hardware `RFY260W_V2.0` e firmware `RFY260W_2.00.03_260724`; la 0.3.9 li esponeva invertiti su iOS.
+
+`getDeviceInfo()` legge firmware e hardware; su iOS richiede prima il MAC al dispositivo tramite `getDeviceMacAddressSuccess:fail:`. `deviceId` resta l'UUID CoreBluetooth su iOS e il MAC Bluetooth su Android. Su Android anche `mac` contiene l'indirizzo della connessione. La risposta può includere `readErrors.mac` e `readErrors.versions` su iOS se una delle letture fallisce esplicitamente: gli altri dati restano disponibili. Un MAC vuoto, non valido o composto da soli 00/FF non viene esposto. I timeout e le disconnessioni continuano a rifiutare l'operazione secondo la politica comune. Ogni lettura iOS scarta i risultati precedenti: non restituisce un vecchio MAC dopo un errore. La presenza dell'API SDK non garantisce che tutti i firmware supportino il comando; verificare sul bracciale reale e confrontare il MAC con Android prima di usarlo per associare dispositivi tra piattaforme.
 
 Il plugin espone solo raccolta automatica: configurazione, lettura dello storico e sincronizzazione. I record hanno source=scheduled; SpO₂ usa i modelli dettagliati su iOS (solo sourceType=0), gli array giornalieri su Android. Non avvia misure su richiesta.
 
@@ -97,7 +106,8 @@ Il web restituisce UNSUPPORTED; non simula un wristband. Definizioni complete in
 ## Verifica e limiti
 
 ```sh
-npm run check
+npm run typecheck
+npm run build
 npm run test:ios-policy
 npm run example:build
 ```

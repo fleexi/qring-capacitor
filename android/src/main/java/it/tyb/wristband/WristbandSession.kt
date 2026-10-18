@@ -18,6 +18,7 @@ internal class WristbandSession(val app:Application,val emit:(String,JSONObject)
     var kind:String?=null; var connection="disconnected"; var deviceId:String?=null
     var retiringId:String?=null;var historyFailure:((JSONObject)->JSONObject)?=null;var connectionToken:String?=null;var writeAcknowledged=false;var pending:Reply?=null;var commandId:String?=null;var watchdog:Runnable?=null
     var scanCallback:ScanCallback?=null; var scanTimeout:Runnable?=null
+    private val scannedNames=mutableMapOf<String,String>()
     var time:SetTimeRsp?=null;var support:DeviceSupportFunctionRsp?=null;var receiver:QCBluetoothCallbackCloneReceiver?=null
     var versionReply:Reply?=null;var firmwareRead:String?=null;var hardwareRead:String?=null;var info=JSONObject();val settingMetadata=mutableMapOf<String,JSONObject>()
     val adapter:BluetoothAdapter? get()=(app.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter
@@ -39,11 +40,13 @@ internal class WristbandSession(val app:Application,val emit:(String,JSONObject)
     private fun finishInitialization(id:String,features:DeviceSupportFunctionRsp) {
         try {
             if (!hasBluetoothPermissions(false)) { failBluetoothPermission(); return }
-            val name = ble.curDevice?.name
+            val name = ble.curDevice?.takeIf { it.address == id }?.name?.trim()?.takeIf { it.isNotEmpty() }
+                ?: scannedNames[id]
+                ?: saved.getString("deviceName",null)?.takeIf { saved.getString("deviceId",null) == id }
             support=features
             connection="ready"
-            info=json("deviceId" to id,"deviceKind" to kind,"name" to name)
-            saved.edit().putString("deviceId",id).putString("deviceKind",kind).apply()
+            info=json("deviceId" to id,"deviceKind" to kind,"name" to name,"mac" to id)
+            saved.edit().putString("deviceId",id).putString("deviceKind",kind).putString("deviceName",name).apply()
             complete(info)
             emit("connectionStateChanged",state())
         } catch (_:SecurityException) { failBluetoothPermission() }
@@ -99,7 +102,7 @@ internal class WristbandSession(val app:Application,val emit:(String,JSONObject)
             "getState"->{done(state(),null);return}
             "getCapabilities"->{done(capabilities(),null);return}
             "stopScan"->{stopScan("requested");done(JSONObject(),null);return}
-            "disconnect","forgetDevice"->{stopScan("requested");close("requested");if(method=="forgetDevice")saved.edit().clear().apply();done(JSONObject(),null);return}
+            "disconnect","forgetDevice"->{stopScan("requested");close("requested");if(method=="forgetDevice"){saved.edit().clear().apply();scannedNames.clear()};done(JSONObject(),null);return}
         }
         val timeout=if(o.has("timeoutMs"))o.optDouble("timeoutMs",Double.NaN)else if(method=="startScan")15000.0 else 60000.0
         if(o.has("timeoutMs") && (o.opt("timeoutMs") !is Number || !timeout.isFinite() || timeout%1.0!=0.0 || timeout<1000 || timeout>120000)){done(null,error("INVALID_ARGUMENT","timeoutMs must be an integer from 1000 to 120000"));return}
@@ -109,7 +112,13 @@ internal class WristbandSession(val app:Application,val emit:(String,JSONObject)
             if(retiringId!=null || gate.token!=null || connection!="disconnected"){done(null,error("BUSY","Wait for disconnection before scanning or connecting"));return}
             if(method=="startScan"){
                 stopScan("requested")
-                val cb=object:ScanCallback(){override fun onScanResult(type:Int,r:ScanResult){main.post{if(scanCallback!==this)return@post;emit("scanResult",json("deviceId" to r.device.address,"name" to r.scanRecord?.deviceName,"rssi" to r.rssi))}};override fun onScanFailed(code:Int){main.post{if(scanCallback===this)stopScan("requested")}}}
+                scannedNames.clear()
+                val cb=object:ScanCallback(){override fun onScanResult(type:Int,r:ScanResult){main.post{
+                    if(scanCallback!==this)return@post
+                    val id=r.device.address
+                    r.scanRecord?.deviceName?.trim()?.takeIf { it.isNotEmpty() }?.let { scannedNames[id]=it }
+                    emit("scanResult",json("deviceId" to id,"name" to scannedNames[id],"rssi" to r.rssi))
+                }};override fun onScanFailed(code:Int){main.post{if(scanCallback===this)stopScan("requested")}}}
                 try {
                     val scanner=adapter?.bluetoothLeScanner
                     if(scanner==null){done(null,error("BLUETOOTH_OFF","Bluetooth scanner unavailable"));return}

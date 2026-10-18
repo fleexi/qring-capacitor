@@ -3,7 +3,7 @@ from pathlib import Path
 from zipfile import ZipFile, ZIP_DEFLATED
 import hashlib
 root=Path(__file__).resolve().parents[1]
-source=root.parent/'QRing_Android_SDK_1.0.0.78/qring_sdk_1.0.0.78.aar'
+source=root.parents[2]/'tyb-wirstband/QRing_Android_SDK_1.0.0.78/qring_sdk_1.0.0.78.aar'
 output=root/'android/vendor/it/tyb/vendor/qring/1.0.0.78-tyb.1'
 output.mkdir(parents=True,exist_ok=True)
 rules='''# QRing uses reflective command dispatch. Keep the vendor API and native entry points.

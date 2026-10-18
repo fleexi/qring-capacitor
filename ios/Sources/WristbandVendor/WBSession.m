@@ -36,6 +36,42 @@ double WBNow(void) { return NSDate.date.timeIntervalSince1970*1000; }
     [self emit:@"connectionStateChanged" data:[self state]];
 }
 - (void)stopScanning:(NSString *)reason { if(!self.scanId)return;[self.central stopScan];self.scanId=nil;if(self.scanTimer)dispatch_block_cancel(self.scanTimer);self.scanTimer=nil;[self emit:@"scanStopped" data:@{@"reason":reason}]; }
+- (void)readDeviceVersions:(NSMutableDictionary *)info errors:(NSMutableDictionary *)errors {
+    WBReply reply=[self once:^(NSDictionary *data,NSDictionary *error) {
+        if(error) errors[@"versions"]=error;
+        else [info addEntriesFromDictionary:data];
+        if(errors.count) info[@"readErrors"]=errors;
+        self.info=info;
+        [self complete:info error:nil];
+    }];
+    // The bundled SDK returns hardware first, firmware second (verified against Android on RFY260W).
+    [QCSDKCmdCreator getDeviceSoftAndHardVersionSuccess:^(NSString *hardware,NSString *software) {
+        NSMutableDictionary *versions=[NSMutableDictionary new];
+        if(software.length) versions[@"firmware"]=software;
+        if(hardware.length) versions[@"hardware"]=hardware;
+        reply(versions,nil);
+    } fail:^{ reply(nil,WBError(@"SDK_ERROR",@"Device version read failed")); }];
+}
+- (void)readDeviceInfo {
+    NSMutableDictionary *info=[self.info mutableCopy];
+    // Each refresh contains fresh values only, never identifiers from an earlier read.
+    [info removeObjectsForKeys:@[@"mac",@"firmware",@"hardware",@"readErrors"]];
+    NSMutableDictionary *errors=[NSMutableDictionary new];
+    WBReply reply=[self once:^(NSDictionary *data,NSDictionary *error) {
+        if(error) errors[@"mac"]=error;
+        else [info addEntriesFromDictionary:data];
+        [self readDeviceVersions:info errors:errors];
+    }];
+    [QCSDKCmdCreator getDeviceMacAddressSuccess:^(NSString *macAddress) {
+        NSString *mac=[[macAddress stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet] uppercaseString];
+        NSPredicate *valid=[NSPredicate predicateWithFormat:@"SELF MATCHES %@",@"([0-9A-F]{2}:){5}[0-9A-F]{2}"];
+        if(mac.length && [valid evaluateWithObject:mac] && ![mac isEqual:@"00:00:00:00:00:00"] && ![mac isEqual:@"FF:FF:FF:FF:FF:FF"]) {
+            reply(@{@"mac":mac},nil);
+        } else {
+            reply(nil,WBError(@"SDK_ERROR",@"Device returned an empty or invalid MAC address"));
+        }
+    } fail:^{ reply(nil,WBError(@"SDK_ERROR",@"Device MAC read failed")); }];
+}
 - (void)invoke:(NSString *)method options:(NSDictionary *)o completion:(WBCompletion)done {
     if([method isEqual:@"checkPermissions"]) {done([self permissionState],nil);return;}
     if([method isEqual:@"requestPermissions"]) { if(!self.central) self.central=[[CBCentralManager alloc] initWithDelegate:self queue:dispatch_get_main_queue() options:@{CBCentralManagerOptionShowPowerAlertKey:@NO}]; if(CBManager.authorization!=CBManagerAuthorizationNotDetermined)done([self permissionState],nil);else if(self.permissionRequest) done(nil,WBError(@"BUSY",@"Permission request already active"));else self.permissionRequest=done; return; }
@@ -71,7 +107,7 @@ double WBNow(void) { return NSDate.date.timeIntervalSince1970*1000; }
         if(p.state==CBPeripheralStateConnected)[self centralManager:self.central didConnectPeripheral:p];else [self.central connectPeripheral:p options:@{CBConnectPeripheralOptionEnableTransportBridgingKey:@NO,CBConnectPeripheralOptionRequiresANCS:@(![self.kind isEqual:@"ring"])}];return;
     }
     if(![self requireReady:done])return;
-    if([method isEqual:@"getDeviceInfo"]) {if(![self begin:done])return;WBReply reply=[self once:^(NSDictionary *d,NSDictionary *e){if(d)self.info=d;[self complete:d error:e];}];[QCSDKCmdCreator getDeviceSoftAndHardVersionSuccess:^(NSString *software,NSString *hardware){NSMutableDictionary *info=[self.info mutableCopy];info[@"firmware"]=software;info[@"hardware"]=hardware;reply(info,nil);} fail:^{reply(nil,WBError(@"SDK_ERROR",@"Device version read failed"));}];return;}
+    if([method isEqual:@"getDeviceInfo"]) {if(![self begin:done])return;[self readDeviceInfo];return;}
     if(![self begin:done])return;
     if([method isEqual:@"getBattery"]) { WBReply reply=[self once:^(NSDictionary *d,NSDictionary *e){[self complete:d error:e];}];[QCSDKCmdCreator readBatterySuccess:^(int n,BOOL charging){reply(@{@"level":@(n),@"charging":@(charging)},nil);} failed:^{reply(nil,WBError(@"SDK_ERROR",@"Battery read failed"));}];return; }
     NSString *m=o[@"metric"];

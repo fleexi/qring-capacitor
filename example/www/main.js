@@ -524,14 +524,14 @@ var init_dist = __esm({
   }
 });
 
-// example/node_modules/capacitor-wristband/dist/esm/web.js
+// example/node_modules/whesp-wirstband-capacitor/dist/esm/web.js
 var web_exports = {};
 __export(web_exports, {
   WristbandWeb: () => WristbandWeb
 });
 var WristbandWeb;
 var init_web = __esm({
-  "example/node_modules/capacitor-wristband/dist/esm/web.js"() {
+  "example/node_modules/whesp-wirstband-capacitor/dist/esm/web.js"() {
     init_dist();
     WristbandWeb = class extends WebPlugin {
       unsupportedPlatform() {
@@ -592,7 +592,7 @@ var init_web = __esm({
   }
 });
 
-// example/node_modules/capacitor-wristband/dist/esm/index.js
+// example/node_modules/whesp-wirstband-capacitor/dist/esm/index.js
 init_dist();
 var Wristband = registerPlugin("Wristband", {
   web: () => Promise.resolve().then(() => (init_web(), web_exports)).then((m) => new m.WristbandWeb())

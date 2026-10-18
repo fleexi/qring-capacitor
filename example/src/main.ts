@@ -1,4 +1,4 @@
-import { Wristband, type Metric } from 'capacitor-wristband';
+import { Wristband, type Metric } from 'whesp-wirstband-capacitor';
 const log = document.querySelector<HTMLPreElement>('#log')!;
 const metric = () => (document.querySelector<HTMLSelectElement>('#metric')!.value as Metric);
 const report = (label: string, value: unknown) => { log.textContent = `${label}: ${JSON.stringify(value, null, 2)}\n${log.textContent}`.slice(0, 30000); };

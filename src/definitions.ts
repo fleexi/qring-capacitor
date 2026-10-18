@@ -8,7 +8,17 @@ export interface OperationSupport { support: Support; reason?: string }
 export interface FieldCapability extends OperationSupport { readable: boolean; writable: boolean; min?: number; max?: number; step?: number; allowedValues?: number[] }
 export interface MetricCapability { history: OperationSupport; settings: { enabled: FieldCapability; intervalMinutes: FieldCapability } }
 export interface DeviceCapabilities { metrics: Record<Metric, MetricCapability> }
-export interface DeviceInfo { deviceId: string; name?: string; mac?: string; firmware?: string; hardware?: string; deviceKind: DeviceKind }
+export interface DeviceInfo {
+  deviceId: string;
+  name?: string;
+  /** Android BLE address; on iOS, read from the connected device using the vendor SDK. */
+  mac?: string;
+  firmware?: string;
+  hardware?: string;
+  deviceKind: DeviceKind;
+  /** Explicit SDK failures for individual reads; other successfully read fields remain available. */
+  readErrors?: { mac?: ErrorDetails; versions?: ErrorDetails };
+}
 export interface Battery { level: number; charging?: boolean }
 export interface WristbandState { bluetooth: 'unknown' | 'on' | 'off' | 'unauthorized' | 'unsupported'; connection: 'disconnected' | 'connecting' | 'initializing' | 'ready'; scanning: boolean; deviceId?: string; operationId?: string }
 export interface Permissions { bluetooth: 'prompt' | 'prompt-with-rationale' | 'granted' | 'denied'; location?: 'prompt' | 'prompt-with-rationale' | 'granted' | 'denied' }
